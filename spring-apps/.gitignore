@@ -1,0 +1,130 @@
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Exclude all .tfvars files, which are likely to contain sensitive data, such as
+# password, private keys, and other secrets. These should not be part of version 
+# control as they are data points which are potentially sensitive and subject 
+# to change depending on the environment.
+*.tfvars
+*.tfvars.json
+
+# Ignore override files as they are usually used to override resources locally and so
+# are not checked in
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Ignore transient lock info files created by terraform apply
+.terraform.tfstate.lock.info
+
+# Include override files you do wish to add to version control using negated pattern
+# !example_override.tf
+
+# Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
+# example: *tfplan*
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+# Scripts
+scripts/*
+scripts/price_explorer/tmp-*
+scripts/price_explorer/index.json
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.wsuo
+VSWorkspaceState.json
+
+# OS
+**/.DS_Store
+
+# Build artifacts
+/build
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Local
+.env.local
+vendor/
+
+# Terraform artifacts
+.terraform.lock.hcl
+**/.terraform/**
+**/.terragrunt-cache/**
+examples/*/plan.save
+examples/*/tfplan.binary
+examples/*/plan.json
+examples/*/example.json
+examples/*/example.save
+
+# Infracost artifacts
+**/.infracost
+infracost-debug-report.json
+
+# Test artifacts
+.test_cache
+
+# Generated docs
+docs/generated/
+
+# Infracost generated files
+cmd/infracost/__debug_*
+
+# Maven artifacts
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.classpath
+.factorypath
+
+# Avoid ignoring Maven wrapper jar file (.jar files are usually ignored)
+!/.mvn/wrapper/maven-wrapper.jar
+
+# Package Files #
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# IntelliJ
+.idea/
+*.iml
+.project
+.settings
+
+# Publish
+publish/
+
+# VS Code
+.vscode/
+
+# Environment setup
+setup-env-variables.sh
+
+# Ansible
+vars.yml

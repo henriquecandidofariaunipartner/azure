@@ -1,0 +1,98 @@
+trigger: none
+pr: none
+
+resources:
+  repositories:
+    - repository: planet-weather-provider
+      type: git
+      name: planet-weather-provider
+      ref: refs/heads/main
+
+pool:
+  name: 'Default'
+
+variables:
+- name: system.debug
+  value: 'true'
+- group: 'azure-spring-apps'
+- name: serviceName
+  value: 'example-springcloud'
+- name: azureSubscription
+  value: 'azure-spring-apps'
+- name: resourceGroupName
+  value: 'example-resources'
+
+steps:
+  # - task: PowerShell@2
+  #   inputs:
+  #     targetType: 'inline'
+  #     script: |
+  #       if (Test-Path "$(Build.ArtifactStagingDirectory)\$(version).zip") {
+  #         Write-Host "##vso[task.setvariable variable=artifactExists]true"
+  #       } else {
+  #         Write-Host "##vso[task.setvariable variable=artifactExists]false"
+  #       }
+  #   displayName: 'Check if artifact exists'
+
+  # - ${{ if eq(variables['artifactExists'], 'false') }}:
+    # - checkout: git://${{ variables.repoName}}@${{ variables.branchRef }}
+    - checkout: planet-weather-provider
+      displayName: 'Baixar repositório'
+
+    - task: UseDotNet@2
+      inputs:
+        packageType: 'sdk'
+        version: '8.x'
+
+    - script: |
+        dotnet build --configuration Release
+      displayName: 'Build application'
+
+    - task: PowerShell@2
+      inputs:
+        targetType: 'inline'
+        script: |
+          Compress-Archive -Force -Path "$(Build.SourcesDirectory)\src\$(repoPath)\bin\Release\netcoreapp3.1\*" -DestinationPath "$(Build.ArtifactStagingDirectory)\$(version).zip"
+      displayName: 'Zip application'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: '$(Build.ArtifactStagingDirectory)\$(version).zip'
+        artifactName: '$(repoPath)'
+      displayName: 'Publish Artifact: $(repoPath)'
+
+    - task: DownloadBuildArtifacts@0
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: '$(repoPath)'
+        downloadPath: '$(Build.ArtifactStagingDirectory)'
+      displayName: 'Download Artifact'
+
+    # - task: PublishPipelineArtifact@1
+    #   inputs:
+    #     targetPath: '$(Build.ArtifactStagingDirectory)\$(version).zip'
+    #     artifact: '$(repoPath)'
+    #   displayName: 'Publish Pipeline Artifact: $(repoPath)'
+
+    # - task: DownloadPipelineArtifact@1
+    #   inputs:
+    #     artifact: '$(repoPath)'
+    #     path: '$(Build.ArtifactStagingDirectory)'
+    #   displayName: 'Download Pipeline Artifact'
+
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        artifact: '$(repoPath)'
+        path: '$(Build.ArtifactStagingDirectory)$(version).zip'
+      displayName: 'Download All Pipeline Artifacts'
+
+    - task: AzureCLI@2
+      # condition: eq(variables['artifactExists'], 'true') or eq(variables['artifactExists'], 'false')
+      inputs:
+        azureSubscription: 'azure-spring-apps'
+        scriptType: 'pwsh'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az login --service-principal -u -p $(client-secret) --tenant  && az spring-cloud app deploy --name $(repoName) --service $(serviceName) --resource-group $(resourceGroupName) --artifact-path "$(Build.ArtifactStagingDirectory)\$(version).zip" --runtime-version NetCore_31 --main-entry $(planetMainEntry)
+      displayName: 'Deploy to Azure Spring Cloud'

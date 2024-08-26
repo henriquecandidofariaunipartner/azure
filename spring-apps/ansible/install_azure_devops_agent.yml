@@ -1,0 +1,51 @@
+---
+- name: Instalar agente Azure DevOps em Ubuntu
+  hosts: all
+  become: yes
+
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Atualizar pacotes APT
+      apt:
+        update_cache: yes
+
+    - name: Instalar dependências necessárias
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+
+    - name: Adicionar repositório Microsoft
+      apt_key:
+        url: https://packages.microsoft.com/keys/microsoft.asc
+        state: present
+
+    - name: Adicionar repositório do agente Azure DevOps
+      apt_repository:
+        repo: "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main"
+        state: present
+
+    - name: Instalar agente Azure DevOps
+      apt:
+        name: azure-devops-agent
+        state: present
+
+    - name: Configurar agente Azure DevOps
+      shell: |
+        mkdir -p /opt/azure-devops-agent
+        cd /opt/azure-devops-agent
+        curl -O https://vstsagentpackage.azureedge.net/agent/2.212.1/vsts-agent-linux-x64-2.212.1.tar.gz
+        tar zxvf vsts-agent-linux-x64-2.212.1.tar.gz
+        ./bin/installdependencies.sh
+        ./config.sh --unattended --url https://dev.azure.com/azureboardsestudos --auth pat --token {{ YOUR_PAT }} --pool default
+        ./svc.sh install
+        ./svc.sh start
+      args:
+        executable: /bin/bash
+
+# ansible-playbook -i inventario.ini install_azure_devops_agent.yml
