@@ -1,0 +1,54 @@
+trigger:
+- none
+
+variables:
+- name: system.debug
+  value: 'true'
+- group: azure-spring-apps
+- name: repoName
+  value: planet-weather-provider
+- name: repoPath
+  value: planet-weather-provider
+- name: branchRef
+  value: main
+- name: planetMainEntry
+  value: 'Microsoft.Azure.SpringCloud.Sample.PlanetWeatherProvider.dll'
+
+parameters:
+- name: major
+  type: string
+  default: '0'
+- name: minor
+  type: string
+  default: '0'
+- name: patch
+  type: string
+  default: '0'
+
+pool:
+  name: 'Default'
+
+steps:
+  - powershell: |
+      echo "##vso[task.setvariable variable=version;]${{ parameters.major }}.${{ parameters.minor }}.${{ parameters.patch }}"
+
+  - powershell: |
+      echo "You can use macro syntax for variables: $(version)"
+
+  - task: AzureCLI@2
+    inputs:
+      azureSubscription: 'azure-spring-apps'
+      scriptType: 'pwsh'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az login --service-principal -u -p $(client-secret) --tenant
+    displayName: 'Az Login'
+
+  - task: AzureCLI@2
+    inputs:
+      azureSubscription: 'azure-spring-apps'
+      scriptType: 'pwsh'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az pipelines variable update --name version --value $(version) --project azure --pipeline-id 1 && az pipelines variable update --name repoName --value $(repoName) --project azure --pipeline-id 1 && az pipelines variable update --name repoPath --value $(repoPath) --project azure --pipeline-id 1 && az pipelines variable update --name branchRef --value $(branchRef) --project azure --pipeline-id 1 && az pipelines variable update --name planetMainEntry --value $(planetMainEntry) --project azure --pipeline-id 1 && az pipelines run --organization https://dev.azure.com/azureboardsestudos --project azure --id 1
+    displayName: 'Invocar pipeline de recepção com variáveis'
