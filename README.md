@@ -1,6 +1,6 @@
 # Azure Project
 
-![projeto](azure/spring-apps/images/projeto.png)
+![projeto](../spring-apps/images/projeto.png)
 
 Este repositório contém scripts e configurações para gerenciar recursos no Azure usando Terraform. Abaixo está uma explicação detalhada dos principais componentes e recursos provisionados.
 
